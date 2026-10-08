@@ -1,25 +1,24 @@
-# weather_forecasting
+﻿# weather_forecasting
 
-기상청 단기예보(동네예보)와 정면 대결하는 서울·대구 예측 모델.
+湲곗긽泥??④린?덈낫(?숇꽕?덈낫)? ?뺣㈃ ?寃고븯???쒖슱쨌?援??덉륫 紐⑤뜽.
 
-- 지점: 서울(ASOS 108), 대구(ASOS 143)
-- 리드타임: 단기 0~48시간
-- 지표: 강수 F1 (임계 0.1mm 기준, 1mm 병행) / 기온·습도·풍속 MAE
-- 컴퓨트: Colab L4
+- 吏?? ?쒖슱(ASOS 108), ?援?ASOS 143)
+- 由щ뱶??? ?④린 0~48?쒓컙
+- 吏?? 媛뺤닔 F1 (?꾧퀎 0.1mm 湲곗?, 1mm 蹂묓뻾) / 湲곗삩쨌?듬룄쨌?띿냽 MAE
+- 而댄벂?? Colab L4
 
-## 데이터
-
-| 용도 | 출처 | 스크립트 |
+## ?곗씠??
+| ?⑸룄 | 異쒖쿂 | ?ㅽ겕由쏀듃 |
 |---|---|---|
-| 정답(관측) | 기상청 ASOS 시간자료 (공공데이터포털) | `scripts/download_asos.py` |
-| 입력 기상장 | ERA5 (Open-Meteo archive) | `scripts/download_era5.py` |
-| 대결 상대 | 동네예보 발표본 | `scripts/collect_kma_forecast.py` (GitHub Actions 3시간 주기 누적) |
+| ?뺣떟(愿痢? | 湲곗긽泥?ASOS ?쒓컙?먮즺 (怨듦났?곗씠?고룷?? | `scripts/download_asos.py` |
+| ?낅젰 湲곗긽??| ERA5 (Open-Meteo archive) | `scripts/download_era5.py` |
+| ?寃??곷? | ?숇꽕?덈낫 諛쒗몴蹂?| `scripts/collect_kma_forecast.py` (GitHub Actions 3?쒓컙 二쇨린 ?꾩쟻) |
 
-`DATA_GO_KR_KEY` 환경변수(공공데이터포털 인증키)가 필요하다. GitHub Actions 쪽은 저장소 secret 으로 등록한다.
+`DATA_GO_KR_KEY` ?섍꼍蹂??怨듦났?곗씠?고룷???몄쬆??媛 ?꾩슂?섎떎. GitHub Actions 履쎌? ??μ냼 secret ?쇰줈 ?깅줉?쒕떎.
 
 ```
 python scripts/download_era5.py 2018-01-01 2025-12-31
 python scripts/download_asos.py 2018-01-01 2025-12-31
 ```
 
-평가 함수는 `src/metrics.py`. 확률 컷오프는 검증 구간에서 F1 최대로 정하고 테스트 구간에 고정한다.
+?됯? ?⑥닔??`src/metrics.py`. ?뺣쪧 而룹삤?꾨뒗 寃利?援ш컙?먯꽌 F1 理쒕?濡??뺥븯怨??뚯뒪??援ш컙??怨좎젙?쒕떎.

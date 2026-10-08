@@ -1,8 +1,8 @@
-import numpy as np
+﻿import numpy as np
 
 
-def rain_scores(y_true_mm, y_pred_rain, threshold_mm=0.1):
-    """강수 이진 분류 지표. y_pred_rain 은 bool(기상청 예보 또는 확률 컷오프 적용 결과)."""
+def rain_scores(y_true_mm, y_pred_rain, threshold_mm=1.0):
+    """媛뺤닔 ?댁쭊 遺꾨쪟 吏?? y_pred_rain ? bool(湲곗긽泥??덈낫 ?먮뒗 ?뺣쪧 而룹삤???곸슜 寃곌낵)."""
     t = np.asarray(y_true_mm) >= threshold_mm
     p = np.asarray(y_pred_rain).astype(bool)
     tp, fp, fn, tn = (t & p).sum(), (~t & p).sum(), (t & ~p).sum(), (~t & ~p).sum()
@@ -17,8 +17,8 @@ def rain_scores(y_true_mm, y_pred_rain, threshold_mm=0.1):
     }
 
 
-def best_cutoff(y_true_mm, prob, threshold_mm=0.1):
-    """검증 구간에서 F1 최대 컷오프를 찾는다. 테스트 구간에는 이 값을 고정 적용."""
+def best_cutoff(y_true_mm, prob, threshold_mm=1.0):
+    """寃利?援ш컙?먯꽌 F1 理쒕? 而룹삤?꾨? 李얜뒗?? ?뚯뒪??援ш컙?먮뒗 ??媛믪쓣 怨좎젙 ?곸슜."""
     cuts = np.linspace(0.05, 0.95, 91)
     f1s = [rain_scores(y_true_mm, np.asarray(prob) >= c, threshold_mm)["f1"] for c in cuts]
     return float(cuts[int(np.argmax(f1s))])
