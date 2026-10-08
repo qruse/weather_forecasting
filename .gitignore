@@ -5,3 +5,4 @@ __pycache__/
 data/raw/asos/
 data/raw/era5/
 checkpoints/
+data/collect.log
