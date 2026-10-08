@@ -20,7 +20,7 @@ jobs:
       - run: pip install pandas requests
       - run: python scripts/collect_kma_forecast.py
         env:
-          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          KMA_APIHUB_KEY: ${{ secrets.KMA_APIHUB_KEY }}
       - name: commit
         run: |
           git config user.name "forecast-bot"

@@ -19,9 +19,9 @@
 |---|---|---|
 | 정답(관측) | 기상청 ASOS 시간자료 (공공데이터포털) | `scripts/download_asos.py` |
 | 입력 기상장 | ERA5 (Open-Meteo archive) | `scripts/download_era5.py` |
-| 대결 상대 | 동네예보 발표본 | `scripts/collect_kma_forecast.py` (GitHub Actions 3시간 주기 누적) |
+| 대결 상대 | 동네예보 발표본 (기상청 API Hub, 최근 3일치만 제공) | `scripts/collect_kma_forecast.py` (3시간 주기로 누적) |
 
-`DATA_GO_KR_KEY` 환경변수(공공데이터포털 인증키)가 필요하다. GitHub Actions 쪽은 저장소 secret 으로 등록한다.
+`DATA_GO_KR_KEY`(공공데이터포털 **Decoding** 인증키, ASOS용)와 `KMA_APIHUB_KEY`(기상청 API Hub authKey, 동네예보용) 환경변수가 필요하다. 키는 저장소에 넣지 않는다. GitHub Actions 쪽은 저장소 secret 으로 등록한다.
 
 ```
 python scripts/download_era5.py 2018-01-01 2025-12-31
