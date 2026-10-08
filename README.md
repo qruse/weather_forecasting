@@ -7,6 +7,12 @@
 - 지표: 강수 F1 (1mm 이상을 비로 판정) / 기온·습도·풍속 MAE
 - 컴퓨트: Colab L4
 
+## Colab
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/qruse/weather_forecasting/blob/main/notebooks/00_colab_setup.ipynb)
+
+런타임을 L4 GPU로 두고 위에서부터 실행하면 Drive 마운트, 저장소 clone, 데이터 준비까지 끝난다. 데이터와 체크포인트는 `MyDrive/weather_forecasting/`에 쌓여서 세션이 끊겨도 남는다. 인증키는 Colab Secrets에 `DATA_GO_KR_KEY`로 등록한다.
+
 ## 데이터
 
 | 용도 | 출처 | 스크립트 |
