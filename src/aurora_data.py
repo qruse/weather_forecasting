@@ -46,6 +46,10 @@ ATMOS = {
     "q": "specific_humidity",
 }
 
+# 지역 크롭 영역 (북, 남, 서, 동). 서울·대구를 가운데 두고 경계 영향을 줄이려 넉넉히 잡았다.
+# 161x240 격자: 높이는 패치(4)의 배수+1(Batch.crop 이 한 줄 자름), 너비는 4의 배수.
+EAST_ASIA = (55.0, 15.0, 100.0, 160.0)
+
 _ds = None
 
 
@@ -63,12 +67,29 @@ def load_static():
     return {k: torch.from_numpy(np.asarray(v, dtype=np.float32)) for k, v in raw.items()}
 
 
-def build_batch(init_time: datetime, static=None, history_hours=6, with_insolation=True) -> Batch:
-    """init_time(UTC, naive) 시점의 분석장과 history_hours 전 분석장으로 Batch 를 만든다."""
+def crop_index(region):
+    """(북, 남, 서, 동) 영역을 0.25도 전 지구 격자(위도 90→-90, 경도 0→359.75)의 행·열 slice 로."""
+    n, s, w, e = region
+    rows = slice(round((90 - n) / 0.25), round((90 - s) / 0.25) + 1)
+    cols = slice(round(w / 0.25), round(e / 0.25))
+    return rows, cols
+
+
+def build_batch(
+    init_time: datetime, static=None, history_hours=6, with_insolation=True, region=None
+) -> Batch:
+    """init_time(UTC, naive) 시점의 분석장과 history_hours 전 분석장으로 Batch 를 만든다.
+
+    region=(북, 남, 서, 동) 을 주면 그 영역만 잘라서 넣는다(메모리 절약).
+    """
     ds = open_arco()
     times = [init_time - timedelta(hours=history_hours), init_time]
     tsel = np.array(times, dtype="datetime64[ns]")
     static = static or load_static()
+    if region is not None:
+        rows, cols = crop_index(region)
+        ds = ds.isel(latitude=rows, longitude=cols)
+        static = {k: v[rows, cols] for k, v in static.items()}
 
     surf_ds = ds[list(SURF.values())].sel(time=tsel).load()
     atm_ds = ds[list(ATMOS.values())].sel(time=tsel, level=list(LEVELS)).load()
@@ -100,11 +121,12 @@ def build_batch(init_time: datetime, static=None, history_hours=6, with_insolati
     )
 
 
-def bilinear(field, lat, lon):
-    """(H, W) 격자(위도 90→-90, 경도 0→359.75)에서 한 점의 쌍선형 보간값."""
+def bilinear(field, lat, lon, lat0=90.0, lon0=0.0):
+    """(H, W) 0.25도 격자(첫 행 위도 lat0 에서 남쪽으로, 첫 열 경도 lon0 에서 동쪽으로)에서
+    한 점의 쌍선형 보간값."""
     h, w = field.shape
-    y = (90.0 - lat) / 0.25
-    x = (lon % 360.0) / 0.25
+    y = (lat0 - lat) / 0.25
+    x = ((lon - lon0) % 360.0) / 0.25
     y0, x0 = int(np.floor(y)), int(np.floor(x))
     y1, x1 = min(y0 + 1, h - 1), (x0 + 1) % w
     fy, fx = y - y0, x - x0
@@ -123,7 +145,8 @@ def rel_humidity(t_c, td_c):
 
 def station_values(pred: Batch, lat, lon):
     """예측 Batch 에서 한 지점의 기온(℃), 습도(%), 풍속(m/s), 강수(모델 단위) 를 뽑는다."""
-    g = lambda k: bilinear(pred.surf_vars[k][0, 0].cpu().numpy(), lat, lon)  # noqa: E731
+    lat0, lon0 = float(pred.metadata.lat[0]), float(pred.metadata.lon[0])
+    g = lambda k: bilinear(pred.surf_vars[k][0, 0].cpu().numpy(), lat, lon, lat0, lon0)  # noqa: E731
     t, td = g("2t") - 273.15, g("2d") - 273.15
     out = {
         "ta": t,
